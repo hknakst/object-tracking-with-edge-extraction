@@ -13,6 +13,31 @@
 #include <stdlib.h>
 #include <string.h>
 
+void SimpleBMP::drawRect(int x1, int y1, int x2, int y2)
+{
+    // draw rectangle point of (x1,y1) to (x2,y2)
+    // coordinates start bottom of the picture
+    x1 = 3*x1; y1 = 3*y1;
+    x2 = 3*x2; y2 = 3*y2;
+    for(int i=y1; i<y2; i+=3)
+    {
+        pixels[i*width+x1] = 255;
+        pixels[i*width+x1+1] = 0;
+        pixels[i*width+x1+2] = 0;
+        pixels[i*width+x2] = 255;
+        pixels[i*width+x2+1] = 0;
+        pixels[i*width+x2+2] = 0;
+    }
+    for(int i=x1; i<x2; i+=3)
+    {
+        pixels[y1*width+i] = 255;
+        pixels[y1*width+i+1] = 0;
+        pixels[y1*width+i+2] = 0;
+        pixels[y2*width+i] = 255;
+        pixels[y2*width+i+1] =0;
+        pixels[y2*width+i+2] = 0;
+    }
+}
 int SimpleBMP::save(const int width, const int height, const unsigned char *pixels, const char *path)
 {
     unsigned char bmp_file_header[14] = { 'B', 'M', 0, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, };

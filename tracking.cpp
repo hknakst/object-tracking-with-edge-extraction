@@ -11,7 +11,7 @@ Tracking::Tracking()
     maskImg=nullptr;
 }
 
-Tracking::Tracking(BYTE *img, int Height, int Width,int x1,int y1,int x2,int y2,int l)
+void Tracking::TrackingSet(BYTE *img, int Height, int Width,int x1,int y1,int x2,int y2,int l)
 {
     this->Height=Height;
     this->Width=Width;
@@ -41,7 +41,7 @@ Tracking::~Tracking()
     delete []maskImg;
 }
 
-void Tracking::cropImg()
+void Tracking::cropSearchImg()
 {
     index=0;
     for(int i=(y1-l); i<(y2+l); i++)
@@ -63,6 +63,25 @@ void Tracking::cropImg()
             index++;
         }
     }
+
+}
+
+void Tracking::cropMaskImg()
+{
+    //zamandan kazanmak icin maskeimg'i butun goruntuden degil searchimg'den cıkarıcaz
+    //bu sekilde hem daha kucuk bir alan taranacak hemde canny hem mask hem search icin
+    //ayrı ayrı uygulanmak yerine search'e uygulanacak ve burdan canny uygulanmıs mask cikarilacak
+
+    index=0;
+       for(int i=l; i<(y2-y1+l); i++)
+       {
+           for(int j=l; j<(x2-x1+l); j++)
+           {
+               C=i*(Width)+j;
+               maskImg[index]=searchImg[C];
+               index++;
+           }
+       }
 
 }
 void Tracking::createSearchMask(int sampleWidth, int sampleHeight)

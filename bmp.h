@@ -72,6 +72,7 @@ public:
     ~SimpleBMP(void);
 
 
+    void drawRect(int x1, int y1, int x2, int y2);
     int save(const char *path) const;
     int load(const char *path);
 

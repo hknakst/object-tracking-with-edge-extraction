@@ -31,11 +31,12 @@ private:
     int newCoordinate[4]={0,0,0,0};
 
 public:
+    void TrackingSet(BYTE *img, int Height, int Width,int x1,int y1,int x2,int y2,int l);
     Tracking();
-    Tracking(BYTE *img, int Height, int Width,int x1,int y1,int x2,int y2,int l);
     ~Tracking();
 
-    void cropImg();
+    void cropSearchImg();
+    void cropMaskImg();
     void createSearchMask(int sampleWidth, int sampleHeight);
     void searchObject();
     int *newArea();

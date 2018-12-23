@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <bmp.h>
 #include <time.h>
+#include <string>
 typedef unsigned char BYTE;
 
 using namespace std;
@@ -94,62 +95,96 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
-
-
+    Tracking tracking;
+    Tracking tracking2;
+    int coordinat[4]={370,127,540,235};
     SimpleBMP bmp;
-    bmp.load("frame/0.bmp");
+    for(int i=0; i<25; i++)
+    {
+        string path ="frame1_ornek/" +std::to_string(i) + ".bmp";
+        bmp.load(path.c_str());
+        bmp.drawRect(coordinat[0],480-coordinat[1],coordinat[2],480-coordinat[3]);
 
-    BYTE *Raw_Intensity;
-    Raw_Intensity = ConvertBMPToIntensity(bmp.getPixels(), bmp.width, bmp.height);
-     clock_t begin = clock();
-    Tracking tracking(Raw_Intensity,bmp.height,bmp.width,100,60,300,400,50);
-    tracking.cropImg();
+        //bmp.save(path.c_str());
 
-    Canny  nesne(tracking.getSearchImg(),tracking.getSearchHeight(),tracking.getSearchWidth());
-    nesne.verticalDerivative();
-    nesne.horizontalDerivative();
-    nesne.edgeImage();
+        BYTE *Raw_Intensity;
+        Raw_Intensity = ConvertBMPToIntensity(bmp.getPixels(), bmp.width, bmp.height);
+         clock_t begin = clock();
+        tracking.TrackingSet(Raw_Intensity,bmp.height,bmp.width,coordinat[0],coordinat[1],coordinat[2],coordinat[3],10);
+        tracking.cropSearchImg();
 
-    BYTE *deneme =new BYTE[(nesne.getHeight() - 2)*(nesne.getWidth() - 2)];
-    deneme=nesne.nonmaximumSuppresion();
+        //1. framden hem search alanını hem mask alanını cıkardım canny uyguladım
+        Canny  nesne(tracking.getSearchImg(),tracking.getSearchHeight(),tracking.getSearchWidth());
+        nesne.verticalDerivative();
+        nesne.horizontalDerivative();
+        nesne.edgeImage();
+        nesne.nonmaximumSuppresion();
+        Canny nesne2(tracking.getMaskImg(),tracking.getMaskHeight(),tracking.getMaskWidth());
+        nesne2.verticalDerivative();
+        nesne2.horizontalDerivative();
+        nesne2.edgeImage();
+        BYTE *deneme2 =new BYTE[(nesne2.getHeight() - 2)*(nesne2.getWidth() - 2)];
+        deneme2=nesne2.nonmaximumSuppresion();
 
-    Canny nesne2(tracking.getMaskImg(),tracking.getMaskHeight(),tracking.getMaskWidth());
-    nesne2.verticalDerivative();
-    nesne2.horizontalDerivative();
-    nesne2.edgeImage();
+       //2. framede 1. framden aldığım nesneyi arıcam
+        string path2 ="frame1_ornek/" +std::to_string(i+1) + ".bmp";
+        bmp.load(path2.c_str());
 
-    BYTE *deneme2 =new BYTE[(nesne2.getHeight() - 2)*(nesne2.getWidth() - 2)];
-    deneme2=nesne2.nonmaximumSuppresion();
-
-   //2. framede 1. framden aldığım nesneyi arıcam
-
-
-
-
-
-    tracking.createSearchMask(10,10);
-    tracking.searchObject();
-
-    clock_t end = clock();
-    double time = double(end-begin)/CLOCKS_PER_SEC;
-
-    long new_size;
-    BYTE *temp_buffer= ConvertIntensityToBMP(deneme, nesne.getWidth()-2, nesne.getHeight()-2,&new_size);
-    long new_size2;
-    BYTE *temp_buffer2= ConvertIntensityToBMP(deneme2, nesne2.getWidth()-2, nesne2.getHeight()-2,&new_size2);
-
-
-
-    bmp.height=(nesne.getHeight()-2);
-    bmp.width=(nesne.getWidth()-2);
-    bmp.pixels=temp_buffer;
-    bmp.save("output.bmp");
+        Raw_Intensity = ConvertBMPToIntensity(bmp.getPixels(), bmp.width, bmp.height);
+        tracking2.TrackingSet(Raw_Intensity,bmp.height,bmp.width,coordinat[0],coordinat[1],coordinat[2],coordinat[3],10);
+        tracking2.cropSearchImg();
+        Canny  nesne3(tracking2.getSearchImg(),tracking2.getSearchHeight(),tracking2.getSearchWidth());
+        nesne3.verticalDerivative();
+        nesne3.horizontalDerivative();
+        nesne3.edgeImage();
+        BYTE *deneme =new BYTE[(nesne3.getHeight() - 2)*(nesne3.getWidth() - 2)];
+        deneme=nesne3.nonmaximumSuppresion();
+    //    Canny nesne4(tracking2.getMaskImg(),tracking2.getMaskHeight(),tracking2.getMaskWidth());
+    //    nesne4.verticalDerivative();
+    //    nesne4.horizontalDerivative();
+    //    nesne4.edgeImage();
+    //    nesne4.nonmaximumSuppresion();
+       tracking2.setMaskImg(tracking.getMaskImg());
 
 
-    bmp.height=(nesne2.getHeight()-2);
-    bmp.width=(nesne2.getWidth()-2);
-    bmp.pixels=temp_buffer2;
-    bmp.save("output2.bmp");
+        tracking2.createSearchMask(10,10);
+        tracking2.searchObject();
+        int *af;
+        af=tracking2.newArea();
+        bmp.drawRect(af[0],480-af[1],af[2],480-af[3]);
+        for(int i=0; i<4; i++)
+            coordinat[i]=af[i];
+        string path3 ="frame1/" +std::to_string(i+1) + ".bmp";
+        bmp.save(path3.c_str());
+        clock_t end = clock();
+        double time = double(end-begin)/CLOCKS_PER_SEC;
+
+
+
+
+
+        long new_size;
+        BYTE *temp_buffer= ConvertIntensityToBMP(deneme, nesne3.getWidth()-2, nesne3.getHeight()-2,&new_size);
+//        long new_size2;
+//        BYTE *temp_buffer2= ConvertIntensityToBMP(deneme2, nesne2.getWidth()-2, nesne2.getHeight()-2,&new_size2);
+
+
+
+        bmp.height=(nesne3.getHeight()-2);
+        bmp.width=(nesne3.getWidth()-2);
+        bmp.pixels=temp_buffer;
+        string path4 ="frame2/" +std::to_string(i+1) + ".bmp";
+        bmp.save(path4.c_str());
+
+
+//        bmp.height=(nesne2.getHeight()-2);
+//        bmp.width=(nesne2.getWidth()-2);
+//        bmp.pixels=temp_buffer2;
+//        bmp.save("output2.bmp");
+
+
+
+    }
 
 
 
