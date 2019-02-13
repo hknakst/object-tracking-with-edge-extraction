@@ -21,7 +21,7 @@ private:
 
 public:
     Canny();
-    Canny(BYTE *img, int Height, int Width);
+    void CannySet(BYTE *img, int Height, int Width);
     ~Canny();
 
 

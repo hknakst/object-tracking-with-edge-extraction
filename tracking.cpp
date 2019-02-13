@@ -21,9 +21,22 @@ void Tracking::TrackingSet(BYTE *img, int Height, int Width,int x1,int y1,int x2
     this->x2=x2;
     this->y2=y2;
     this->l=l;
+    //arama ekranı boyutu
+    this->m1=x1-l;
+    this->m2=x2+l;
+    this->n1=y1-l;
+    this->n2=y2+l;
+    if(n2>=480)
+        n2=480;
+    if(n1<=0)
+        n1=0;
+    if(m1<=0)
+        m1=0;
+    if(m2>=640)
+        m2=640;
 
-    this->searchHeight=(y2+l)-(y1-l);
-    this->searchWidth=(x2+l)-(x1-l);
+    this->searchHeight=(n2)-(n1);
+    this->searchWidth=(m2)-(m1);
     searchImg=new BYTE[searchHeight*searchWidth];
 
     this->maskHeight=y2-y1;
@@ -44,9 +57,9 @@ Tracking::~Tracking()
 void Tracking::cropSearchImg()
 {
     index=0;
-    for(int i=(y1-l); i<(y2+l); i++)
+    for(int i=n1; i<n2; i++)
     {
-        for(int j=(x1-l); j<(x2+l); j++)
+        for(int j=m1; j<m2; j++)
         {
             C=i*(Width)+j;
             searchImg[index]=img[C];
@@ -86,11 +99,12 @@ void Tracking::cropMaskImg()
 }
 void Tracking::createSearchMask(int sampleWidth, int sampleHeight)
 {
-
-    gap[0] = round(maskHeight/sampleHeight);
-    gap[1] = round(maskWidth/sampleWidth);
-
-
+    if(sampleHeight>=maskHeight)
+            sampleHeight=maskHeight;
+        if(sampleWidth>=maskWidth)
+            sampleWidth=maskWidth;
+        gap[0] = round(maskHeight/sampleHeight);
+        gap[1] = round(maskWidth/sampleWidth);
 }
 
 void Tracking::searchObject()
@@ -100,26 +114,39 @@ void Tracking::searchObject()
     int StartPoint=0;
     newStartPoint=0;
 
-    for (int i = 0; i < searchHeight; i++)
-            for (int j  = 0; j < searchWidth; j++)
+    for (int i = 0; i < (searchHeight-maskHeight)+1; i++)
+    {
+            for (int j  = 0; j < (searchWidth-maskWidth)+1; j++)
             {
-               score=0;
                for (int k = 0; k< maskHeight; k+=gap[0])
+               {
                    for (int h = 0; h< maskWidth; h+=gap[1])
                    {
                        if(h==0 && k==0)
-                           StartPoint=(i* searchWidth + j)+(k * maskWidth + h);
-
-                       score+=(searchImg[(i* searchWidth + j)+(k * searchWidth + h)] == maskImg [k * maskWidth + h]);
+                           StartPoint=(i* searchWidth + j);
+                       if((searchImg[(i* searchWidth + j)+(k * searchWidth + h)] ==255 && maskImg [k * maskWidth + h]==255))
+                            score++;
+                           //score+=((searchImg[(i* searchWidth + j)+(k * searchWidth + h)] == maskImg [k * maskWidth + h]));
                    }
 
+                }
                if(score>maxscore)
                {
-                   newStartPoint=StartPoint;
-                   maxscore=score;
-                }
-             }
+//                   if(score<5)
+//                   {
+//                       newStartPoint=StartPoint+(l*searchWidth);
+//                       maxscore=score;
+//                   }
+//                   else
+//                   {
+                       newStartPoint=StartPoint;
+                       maxscore=score;
+//                   }
 
+                }
+                 score=0;
+             }
+    }
 
 }
 
@@ -128,8 +155,8 @@ int *Tracking::newArea()
     int searchY1= newStartPoint/searchWidth;
     int searchX1=newStartPoint-(searchY1*searchWidth);
 
-    newCoordinate[0]=(x1-l)+searchX1;
-    newCoordinate[1]=(y1-l)+searchY1;
+    newCoordinate[0]=(m1)+searchX1;
+    newCoordinate[1]=(n1)+searchY1;
     newCoordinate[2]=newCoordinate[0]+(x2-x1);
     newCoordinate[3]=newCoordinate[1]+(y2-y1);
 

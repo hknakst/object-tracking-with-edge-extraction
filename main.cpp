@@ -97,13 +97,13 @@ int main(int argc, char *argv[])
     w.show();
     Tracking tracking;
     Tracking tracking2;
-    int coordinat[4]={370,127,540,235};
+    int coordinat[4]={30,52,534,228};
     SimpleBMP bmp;
-    for(int i=0; i<25; i++)
+    for(int i=0; i<24; i++)
     {
         string path ="frame1_ornek/" +std::to_string(i) + ".bmp";
         bmp.load(path.c_str());
-        bmp.drawRect(coordinat[0],480-coordinat[1],coordinat[2],480-coordinat[3]);
+        bmp.drawRect(coordinat[0],270-coordinat[1],coordinat[2],270-coordinat[3]);
 
         //bmp.save(path.c_str());
 
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
         deneme2=nesne2.nonmaximumSuppresion();
 
        //2. framede 1. framden aldığım nesneyi arıcam
-        string path2 ="frame1_ornek/" +std::to_string(i+1) + ".bmp";
+        string path2 ="frame1_ornek/" +std::to_string(i+2) + ".bmp";
         bmp.load(path2.c_str());
 
         Raw_Intensity = ConvertBMPToIntensity(bmp.getPixels(), bmp.width, bmp.height);
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
         tracking2.searchObject();
         int *af;
         af=tracking2.newArea();
-        bmp.drawRect(af[0],480-af[1],af[2],480-af[3]);
+        bmp.drawRect(af[0],270-af[1],af[2],270-af[3]);
         for(int i=0; i<4; i++)
             coordinat[i]=af[i];
         string path3 ="frame1/" +std::to_string(i+1) + ".bmp";
@@ -164,14 +164,14 @@ int main(int argc, char *argv[])
 
 
         long new_size;
-        BYTE *temp_buffer= ConvertIntensityToBMP(deneme, nesne3.getWidth()-2, nesne3.getHeight()-2,&new_size);
+        BYTE *temp_buffer= ConvertIntensityToBMP(deneme, nesne.getWidth()-2, nesne.getHeight()-2,&new_size);
 //        long new_size2;
 //        BYTE *temp_buffer2= ConvertIntensityToBMP(deneme2, nesne2.getWidth()-2, nesne2.getHeight()-2,&new_size2);
 
 
 
-        bmp.height=(nesne3.getHeight()-2);
-        bmp.width=(nesne3.getWidth()-2);
+        bmp.height=(nesne.getHeight()-2);
+        bmp.width=(nesne.getWidth()-2);
         bmp.pixels=temp_buffer;
         string path4 ="frame2/" +std::to_string(i+1) + ".bmp";
         bmp.save(path4.c_str());

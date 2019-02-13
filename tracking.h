@@ -15,6 +15,10 @@ private:
     int x2;
     int y2;
     int l;
+    int m1;
+    int m2;
+    int n1;
+    int n2;
     //belirlenen alanın cevresi yani nesnenin aranacak oldugu bolge
     int searchHeight;
     int searchWidth;
